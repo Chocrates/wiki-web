@@ -2,68 +2,69 @@
 
 import urllib.request
 import urllib.parse
+import logging
 from bs4 import BeautifulSoup
-import re
-import sys
 from wikiNode import WikiNode
-import html
+
 
 class Spider:
-   wiki_prefix = 'http://en.wikipedia.org'
-   ignore_list = [
-         'Main_Page',
-         'Wikipedia:',
-         'File:',
-         'Category:',
-         'Special:',
-         'Help:',
-         'Portal:',
-         'Template:'
-   ]
+    wiki_prefix = 'http://en.wikipedia.org'
+    ignore_list = [
+        'Main_Page', 'Wikipedia:', 'File:', 'Category:', 'Special:', 'Help:',
+        'Portal:', 'Template:'
+    ]
 
-   def getPage(self,url):
-      try:
-         return urllib.request.urlopen(url).read().decode('utf-8','ignore')
-      except Exception as e:
-         print(e)
+    def __init__(self):
+        self.logger = logging.getLogger('Wiki-web.window.TreeWindow')
 
-   def getLinks(self,page,prefix):
-      links = []
-      soup = BeautifulSoup(page,'lxml')
-      for elem in soup.find_all('a', href=True):
-         try:
-            links.append(elem['href'] if bool(urllib.parse.urlparse(elem['href']).netloc) else prefix + elem['href'])
-         except ValueError:
-            import pdb; pdb.set_trace()
-      return links
+    def getPage(self, url):
+        try:
+            return urllib.request.urlopen(url).read().decode('utf-8', 'ignore')
+        except Exception as e:
+            print(e)
 
-   def filterLinks(self,links):
-      return [link for link in links
-               if self.wiki_prefix + '/wiki/' in link
-               and not any(pattern in link for pattern in self.ignore_list)]
+    def getLinks(self, page, prefix):
+        links = []
+        soup = BeautifulSoup(page, 'lxml')
+        for elem in soup.find_all('a', href=True):
+            try:
+                links.append(elem['href'] if bool(
+                    urllib.parse.urlparse(elem['href']).netloc) else
+                             prefix + elem['href'])
+            except ValueError as e:
+                # Should we really just log here?
+                # Or should we crash if we can't read links from a page?
+                self.logger.error(e)
 
-   def buildNode(self, link, parent = None, depth = 1):
-      if depth == 0:
-         return WikiNode(link,
-                        # BeautifulSoup(self.getPage(link), 'lxml').title.string[:-12],
-                         self.buildTitleFromUrl(link),
-                         parent, None)
-      else:
-         page = self.getPage(link)
-         # Get the child links, cast to a set to remove duplicates
-         # Sort so testing is easier for now
-         child_links = sorted(set(self.filterLinks(self.getLinks(page,self.wiki_prefix))))
-         node = WikiNode(link, BeautifulSoup(page,'lxml').title.string[:-12], parent, None)
-         node.children = [self.buildNode(child, node, depth - 1) for child in child_links]
-         return node
+        return links
 
-   def buildTitleFromUrl(self, url):
-      return urllib.parse.unquote(url[29:].replace('_',' '))
+    def filterLinks(self, links):
+        return [
+            link for link in links
+            if self.wiki_prefix + '/wiki/' in link and not any(
+                pattern in link for pattern in self.ignore_list)
+        ]
 
-if __name__ == '__main__':
-      depth = 1
+    def buildNode(self, link, parent=None, depth=1):
+        if depth == 0:
+            return WikiNode(link, self.buildTitleFromUrl(link), parent, None)
+        else:
+            page = self.getPage(link)
+            # Get the child links, cast to a set to remove duplicates
+            # Sort so testing is easier for now
+            child_links = sorted(
+                set(self.filterLinks(self.getLinks(page, self.wiki_prefix))))
+            node = WikiNode(link,
+                            BeautifulSoup(page, 'lxml').title.string[:-12],
+                            parent, None)
+            node.children = [
+                self.buildNode(child, node, depth - 1) for child in child_links
+            ]
+            return node
 
-#      wiki_nodes = buildNode('http://en.wikipedia.org/wiki/Great-tailed_grackle', depth)
-      wiki_nodes = buildNode('http://en.wikipedia.org/wiki/John_Wesley_Hyatt',depth)
-      for link in wiki_nodes:
-         print(link)
+    def buildTitleFromUrl(self, url):
+        ''' Build a title from an english Wikipedia URL '''
+        if 'http://en.wikipedia.org/wiki/' in url[:29]:
+            return urllib.parse.unquote(url[29:].replace('_', ' '))
+        else:
+            self.logger.error('Invalid link provided: %s', url)
