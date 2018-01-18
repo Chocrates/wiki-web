@@ -1,8 +1,9 @@
 class WikiNode:
-    def __init__(self, baseUrl, children, rawPageBody):
+    def __init__(self, baseUrl,title, parent=None, children=None):
         self.baseUrl = baseUrl
+        self.parent = parent
         self.children = children
-        self.rawPageBody = rawPageBody
+        self.title = title
 
     def __iter__(self):
         if self.children is not None:
