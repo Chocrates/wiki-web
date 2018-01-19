@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from wikiNode import WikiNode
 
 
-class Spider:
+class Spider(_UrlLib, ):
     wiki_prefix = 'http://en.wikipedia.org'
     ignore_list = [
         'Main_Page', 'Wikipedia:', 'File:', 'Category:', 'Special:', 'Help:',
