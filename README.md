@@ -3,8 +3,6 @@ This is my first attempt at a wikipedia visualizer
 I already want to rewrite the renderer such that we can display the page relationships visually rather than in tabular format.  Probably with OpenGL, either in a Gtk widget or a custom SDL window.  
 
 ## TODO ##
-* Homogonize variable names  
-** Determine CamelCase or Under_Score_Case and stick with it throughout  
 * Fix Comments  
 * Fix highlights so it properly lets the user know the path they have taken  
 * Put the WebKit widget URL loading in to a thread so the UI doesn't hang  
