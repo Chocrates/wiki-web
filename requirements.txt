@@ -1,0 +1,7 @@
+PyHamcrest == 1.9.0
+beautifulsoup4 == 4.6.0
+gi == 1.2
+mock == 2.0.0
+
+# Used for unit testing
+pytest == 3.3.2
