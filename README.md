@@ -17,3 +17,7 @@ I already want to rewrite the renderer such that we can display the page relatio
 - How should we get the root node?  
 * Unit Tests  
     * Finish up window.py
+
+## Setup ##
+* sudo apt-get install python3-gi python3-gi-cairo gir1.2
+* pip3 install -r requirements.txt

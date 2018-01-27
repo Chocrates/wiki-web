@@ -190,7 +190,7 @@ class TreeWindow(Gtk.Window):
 
             # Build our node out only if we don't have children
             if node.children is None:
-                node = spider.buildNode(node.base_url, node.parent, 1)
+                node = spider.build_node(node.base_url, node.parent, 1)
 
             # If this is the root node 
             if node.parent is None:
@@ -223,7 +223,7 @@ class TreeWindow(Gtk.Window):
         ][0]
         spider = Spider()
         self.logger.debug('Selected Node: ' + node.title)
-        node = spider.buildNode(node.base_url, node.parent, 1)
+        node = spider.build_node(node.base_url, node.parent, 1)
 
         self.set_node_lists(self.node_lists[0],self.node_lists[1],node.children)
 
@@ -249,7 +249,7 @@ class TreeWindow(Gtk.Window):
         spider = Spider()
 
         if node.children is None:
-            node = spider.buildNode(node.base_url, node.parent, 1)
+            node = spider.build_node(node.base_url, node.parent, 1)
 
         self.set_node_lists(self.node_lists[1], self.node_lists[2], node.children)
 
@@ -261,12 +261,15 @@ class TreeWindow(Gtk.Window):
 
     def render_web_kit(self, url):
         self.logger.debug('Rendering URL: ' + url)
+        # Load Url
+        spider = Spider()
         self.web_view.load_uri(url)
         self.show_all()
 
     def load_changed(self, web_view, evt):
         if evt == WebKit2.LoadEvent.FINISHED:
-            self.set_title(web_view.get_title())
+            _title = web_view.get_title() or ''
+            self.set_title(web_view.get_title() or '')
         else:
             self.set_title('Loading... {:0.1f}%'.format(
                 web_view.get_estimated_load_progress()))

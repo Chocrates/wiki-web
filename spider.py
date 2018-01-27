@@ -77,3 +77,12 @@ class Spider():
         else:
             self.logger.error('Invalid link provided: %s', url)
             raise ValueError('Invalid URL Provided')
+
+
+    def get_wiki_body(self,url):
+        soup = self.get_soup(self.get_page(url))
+        for elem in soup.find_all('div'):
+            if elem.get('id') == 'content':
+                return str(elem)
+
+        raise ValueError('content div for %s not found'.format(url))
